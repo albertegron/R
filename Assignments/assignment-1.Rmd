@@ -1,0 +1,169 @@
+Use `seq()` to create the vector $(1,2,3,\ldots,10)$.
+
+```{r}
+seq(1,10)
+```
+
+## Question 1
+
+a) Use the `seq()` function to create the vector $(1, 7, 13, \ldots, 61)$. Note that each term in this sequence is of the form 
+$1 + 6n$ where $n = 0, \ldots, 10$.
+
+```{r}
+seq(1, 61, by = 6)
+```
+
+b) Use `seq()` and `c()` to create the vector $(1, 2, 3, \ldots, 10, 9, 8, \ldots, 3, 2, 1)$.
+
+```{r}
+c(x <- (seq(1:10)), rev(x[-length(x)]))
+```
+
+c) Use `rep()` to create the vector $(2,3,4,\dots,2,3,4)$ in which the sequence $(2,3,4)$ is repeated 5 times.
+
+```{r}
+rep(c(2, 3, 4), times = 5)
+```
+
+d) Use `rep()` to create the vector $(1,1,\ldots,1,2,2,\ldots,2,3,3,\ldots,3)$ where each number is repeated 10 times.
+
+```{r}
+rep(c(1, 2, 3), each = 10)
+```
+
+
+## Question 2
+
+
+
+a) Compute: $$\sum_{n=10}^{100} n^3$$
+
+```{r}
+sum((10:100)^3)
+```
+
+b) Compute: $$\sum_{n=1}^{10}\left(\frac{2^{n}}{n^2} + \frac{n^{4}}{4^{n}}\right)$$
+
+```{r}
+n <- seq(1:10)
+sum((2^n/n^2) + (n^4/4^n))
+```
+
+c) Compute: $$\sum_{n=0}^{10} \frac{1}{(n+1)!}$$ 
+Hint: Use `factorial(n)` to compute $n!$
+
+```{r}
+n <- 0:10
+sum(1/factorial(n + 1))
+```
+
+d) Compute: $$\prod_{n=3}^{33} \left(3n + \frac{3}{\sqrt[3]{n}}\right)$$
+
+```{r}
+n <- 3:33
+prod((3*n) + (3/(n^(1/3))))
+```
+
+
+## Question 3
+
+a) Create an empty list `mylist`.
+
+```{r}
+mylist <- list()
+```
+
+
+b) Add a component named `firstVar` whose value is the numeric vector $(1,2,\ldots,10)$.
+
+```{r}
+firstVar <- 1:10
+my_list <- list(firstVar)
+my_list
+```
+
+
+c) Add a component named `secondVar` which is a 4x5 matrix whose elements are $(1,2,\ldots,20)$ in row-wise order.
+
+```{r}
+secondVar <- matrix(1:20, nrow = 4, ncol = 5, byrow = TRUE)
+my_list <- list(firstVar, secondVar)
+my_list
+```
+
+d) Add a component named `thirdVar` which is the output of multipling each element of `secondVar` by the average of `firstVar`.
+```{r}
+thirdVar <- (secondVar) * mean(firstVar)
+my_list <- list(firstVar, secondVar, thirdVar)
+my_list
+```
+
+e) Display `mylist` on the screen, after rounding the elements of 'thirdVar' to the nearest integer.
+```{r}
+thirdVar <- as.integer(thirdVar)
+my_list <- list(firstVar, secondVar, thirdVar)
+my_list
+```
+
+## Question 4
+`iris` data set gives the measurements in centimeters of the variables sepal length, sepal width, petal length and petal width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
+
+Install the `iris` data set on your computer using the command `install.packages("datasets")`. Then load the `datasets` package into your session using the following command.
+```{r}
+library(datasets)
+```
+
+a) Display the first 6 rows of the `iris` data set
+
+```{r}
+head(iris)
+```
+
+b) Compute the average of the first four variables (Sepal.Length, Sepal.Width, Petal.Length and Petal.Width) using `sapply()` function.
+
+Hint: You might need to consider removing the `NA` values, otherwise the average will not be computed.
+
+```{r}
+sapply(iris[ , 1:4], mean, na.rm = TRUE)
+```
+
+
+
+c) Show how to use R to replace the missing values in this dataset with plausible ones.
+```{r}
+iris2 <- iris
+for (i in 1:4){
+iris2[is.na(iris2[,i]), i] <- mean(iris2[,i], na.rm = TRUE)
+}
+```
+
+
+
+d) Compute the standard deviation for only the first and the third variables (Sepal.Length and Petal.Length)
+
+```{r}
+sapply(iris[, seq(1,3, by =2)], sd)
+```
+
+e) Construct a boxplot for `Sepal.Width` variable, then display all the outliers.
+
+```{r}
+boxplot((iris$Sepal.Width), ylab = "Spal Width", main = "Sepal Width") 
+boxplot.stats(iris$Sepal.Width)$out
+```
+
+f) Compute the lower and the upper quartiles of `Sepal.Width` variable
+
+```{r}
+quantile(iris$Sepal.Width, probs = c(0.25, 0.75))
+```
+
+g) Construct a pie chart to describe the species with 'Sepal.Length' greater than 5 centimeters.
+```{r}
+table1 <- table(iris$Species, iris$Sepal.Length > 5)
+table1
+pie(table1[ , 2], main = "Sepal Length >5")
+```
+
+
+END of Assignment #1.
