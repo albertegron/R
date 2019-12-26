@@ -1,0 +1,211 @@
+---
+title: 'CIND123 Fall 2019 - Assignment #2'
+author: "Albert Egron"
+date: ' '
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+Use R Studio for this assignment. 
+Edit the file `assignment-2.Rmd` and insert your R code where wherever you see the string "INSERT YOUR ANSWER HERE"
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. 
+
+When your are done with your answers and before submitting, save the file with the following naming convention :your **Lastname_firstname**
+
+Submit **both** the rmd and the pdf output(or word or html) files, failing to submit **both** will be subject to mark deduction.
+
+This assignment may make use of data provided by the `ISwR` package.
+
+```{r}
+library(ISwR)
+```
+
+## Sample Question and Solution
+
+Use `seq()` to create the vector $(1,2,3,\ldots,20)$.
+
+```{r}
+seq(1,20)
+```
+
+******
+\newpage
+## Question 1 
+
+Based on the Department of Mines and Technical Surveys and Statistics Canada, the attached file contains a migration data frame that has 90 entries and 8 columns.
+
+There is one record in the data file for each migration stream. You can average the 1966 and 1971 population figures for each of the source and destination provinces.
+
+This data frame contains the following columns:
+
+-	Source: Province of origin (source). A factor with levels: ALTA, Alberta; BC, British Columbia; MAN, Manitoba; NB, New Brunswick; NFLD, New Foundland; NS, Nova Scotia; ONT, Ontario; PEI, Prince Edward Island; QUE, Quebec; SASK, Saskatchewan.
+
+-	Destination: Province of destination (1971 residence). A factor with levels: ALTA, Alberta; BC, British Columbia; MAN, Manitoba; NB, New Brunswick; NFLD, New Foundland; NS, Nova Scotia; ONT, Ontario; PEI, Prince Edward Island; QUE, Quebec; SASK, Saskatchewan.
+
+-	Migrants: Number of migrants (from source to destination) in the period 1966 - 1971.
+
+-	Distance: Distance (between principal cities of provinces): NFLD, St. John; PEI, Charlottetown; NS, Halifax; NB, Fredricton; QUE, Montreal; ONT, Toronto; MAN, Winnipeg; SASK, Regina; ALTA, Edmonton; BC, Vancouver.
+-	pops66: 1966 population of source province.
+-	pops71: 1971 population of source province.
+-	popd66: 1966 population of destination province.
+-	popd71: 1971 population of destination province.
+
+Import the file to a data frame:
+
+```{r}
+Data1 <- read.csv("C:/Users/User/Desktop/CIND 123/Assignment 2/migration.csv", header = TRUE)
+migration_data <- data.frame(Data1)
+```
+
+a) Extract the columns 'source', 'destination', and 'migrants' into a new data frame of the name 'mig'.
+
+```{r}
+mig <- data.frame(Data1[, 1:3])
+```
+
+b) Use the rename command of the plyr package to rename columns names to 'From', 'To', and 'Migrants'.
+- hint: make sure to store the output of the rename command into a new frame.
+
+```{r}
+library(plyr)
+mig_rename <- rename(mig, c("source" = "From","destination" = "To","migrants" = "Migrants"))
+```
+
+c) Use the aggregate function to determine the sum of migrants grouped by 'From'.
+
+```{r}
+sumMigrantFrom <- aggregate(mig_rename$Migrants, by = list(From = mig_rename$From), FUN = sum)
+names(sumMigrantFrom) <- c("From", "Migrants")
+sumMigrantFrom
+```
+
+d) Use the aggregate function to determine the sum of migrants grouped by 'To'.
+
+```{r}
+sumMigrantTo <- aggregate(mig_rename$Migrants, by=list(From = mig_rename$To), FUN = sum)
+names(sumMigrantTo) <- c("To", "Migrants")
+sumMigrantTo
+```
+
+e) Create a new data frame that contains the results of increase or decrease of the number of migrants for every province.
+- Hint: Subtract the 'To' column 'From' column and add a new column to reflect the change in a new data frame.
+
+```{r}
+change <- data.frame(sumMigrantTo[1], sumMigrantTo[2] - sumMigrantFrom[2])
+names(change) <- c("Province", "Migrants change by province")
+change
+```
+
+f) Plot the change in a diagram, based on the diagram:
+- Which province has the highest increase in population?
+- Which province has the highest decrease in population? 
+```{r}
+bar <- barplot(change$`Migrants change by province`, main = "Migrants Change by Province", horiz = TRUE, xlab = "Population Change")
+text(bar, labels = change$Province)
+subset(change, change$`Migrants change by province` == max(change$`Migrants change by province`))
+subset(change, change$`Migrants change by province` == min(change$`Migrants change by province`))
+```
+
+
+
+******
+\newpage
+## Question 2
+
+In an experiment of rolling 10 dice simultaneously. Use the binomial distribution to calculate the followings:
+
+a) The probability of getting six 6's
+```{r}
+((factorial(10))/(factorial(6)*factorial(4)))*((1/6)^6)*((5/6)^4)
+```
+
+b) The probability of getting six, seven, or eight 3's
+```{r}
+(((factorial(10))/(factorial(6)*factorial(4)))*((1/6)^6)*((5/6)^4) + ((factorial(10))/(factorial(7)*factorial(3)))*((1/6)^7)*((5/6)^3) + ((factorial(10))/(factorial(8)*factorial(2)))*((1/6)^8)*((5/6)^2))
+```
+
+c) The probability of getting six even numbers
+```{r}
+((factorial(10))/(factorial(6)*factorial(4)))*((1/2)^6)*((1/2)^4)
+```
+
+
+******
+\newpage
+## Question 3 
+
+In a shipment of 20 engines, history shows that the probability of any one engine proving unsatisfactory is 0.1
+
+a) Use the Binomial approximation to calculate the probability that at least three engines are defective? 
+```{r}
+1- pbinom(2, 20, 0.1)
+```
+
+
+b) Use the Poisson approximation to calculate the probability that at least three engines are defective? 
+```{r}
+ppois(3, 20*0.1, lower.tail = FALSE)
+```
+
+
+c) Compare the results of parts a and b, then illustrate on how well the Poisson probability distribution approximates the Binomial probability distribution.
+```{r}
+#Because the probablity of finding defective engines are low, therefore Poisson distribution tends to be more compressed and on the other hand, binomial distribution tends to be more spread out and leaves longer tail towards the end.  
+```
+
+
+
+******
+\newpage
+## Question 4 
+
+In a shipment of 300 processors, there are 12 defective processors. A quality control consultant randomly collects 6 processors for inspection to determine whether they are defective.  Use the Hypergeometric approximation to calculate the following:
+
+a) The probability that there are exactly 2 defectives in the sample
+```{r}
+dhyper(2, m = 12, n = 288, k = 6)
+```
+
+b) The probability that there are at most 5 defectives in the sample, P(X<=5).
+```{r}
+dhyper(5, m = 12, n = 288, k = 6)
+```
+
+******
+\newpage
+## Question 5 
+
+Write a script in R to compute the following probabilities of a normal random variable with mean 16 and variance 9
+
+a) lies between 14.4 and 20.3 (inclusive)
+```{r}
+pnorm(20.3, 16, 3) - pnorm(14.4, 16, 3)
+```
+
+
+b) is greater than 21.8
+```{r}
+pnorm(21.8, 16, 3, lower.tail = FALSE)
+```
+
+
+c) is less or equal to 10.5
+```{r}
+pnorm(10.5, 16, 3)
+```
+
+
+d) is less than 13 or greater than 19
+```{r}
+pnorm(13, 16, 3) + pnorm(19, 16, 3, lower.tail = FALSE)
+```
+
+******
+
+END of Assignment #2.
