@@ -1,0 +1,145 @@
+## Question 1
+
+Use the following commands to install the `airquality` dataset and load the `datasets` package into your session.
+```{r}
+install.packages("datasets")
+library(datasets) 
+data(airquality)
+str(airquality)
+```
+
+
+a) Use a histogram to assess the normality of the `Ozone` variable, then explain why it does not appear normally distributed.
+```{r}
+hist(airquality$Ozone)
+summary(airquality$Ozone)
+#It's not normaly distributed because of several possible reasons:
+#1. Outliers, can cause the data to become skewed. The mean is especially sensitive to outliers when there are extreme outliers, they can cause the data not to be normally distributed. 
+#2. Multiple distributions, may be combined to cause not normal distribution, this is giving the appearance of a bimodal or multimodal distribution that eventually creates abnormal distribution.
+#3. Insufficient Data can cause a normal distribution to look completely scattered. In our case there are many NA values which might be a reason for getting not normal distribution.
+
+```
+
+b) Create a set of boxplots that shows the distribution of `Ozone` in each month. 
+Use different colors for each month.
+```{r}
+boxplot(airquality$Ozone ~ airquality$Month, data = airquality, main = "Ozone Distribution in Each Month", xlab = "Months", ylab = "Ozone", col = c("blue", "Green", "purple", "red", "gold"))
+```
+
+
+
+##Question 2
+
+Use the following commands to install the `marketing` dataset and load the `datarium` package into your session.
+```{r}
+install.packages("datarium")
+library(datarium)
+data("marketing", package = "datarium")
+str(marketing)
+```
+
+a)  Find the covariance between the `Sales` and the advertising budget of `newspaper`. Comment on the output, in terms of the strength and direction of the relationship.
+```{r}
+cov(marketing$sales, marketing$newspaper)
+
+#Based on the output the value we obtained is 37.3556 which a strong positive value. It's also shows that the values tend into positive direction together that they have positive covariance. 
+```
+
+b) Plot the `Sales` as a function of the `Youtube` variable using a scatterplot, then graph the least-square line on the same plot. 
+Hint: You may use the `ggplot()` function from `ggplot2` package. 
+
+```{r}
+least <- lm(youtube~sales, data = marketing)
+plot(marketing$sales, marketing$youtube)
+abline(least)
+```
+
+c) Use the regression line to predict the `Sales` amount when `newspaper` budget is `$136.18K`. Comment on the difference between the output and the expected value. 
+```{r}
+model1 <- lm(sales ~ newspaper, data = marketing) 
+predict(model1, data.frame(newspaper = 136.18))
+
+# By checking the value from the table. We were interested to find the closest value which was predicted based on what we got. From the budget of 136.18 the lower closeset value from the table is 121.08 and the upper closest value is 136.8 which is the value we are going to consider to be closest ro 136.18K.   
+
+# The predicted Sale value for 136.18K is 22.26979 which is higher than the actual data from the table which is listed in our dataset for 136.8K as 15 for its Sales value.     
+```
+
+d) Use `newspaper` and `facebook` variables to build a linear regression model to predict `sales`. Display a summary of your model indicating Residuals, Coefficients, ..., etc. What conclusion can you draw from this summary?
+```{r}
+model <- lm(sales ~ newspaper + facebook, data = marketing)
+summary(model)$coef
+
+#From the output above, the coefficients table shows the beta coefficient estimates and their significance levels. Columns are:
+#Estimate: the intercept (b0) and the beta coefficient estimates associated to each predictor variable. 
+#Std.Error: this represents the accuracy of the coefficients. The larger the Std Error, the less confident we are about the estimate.
+#t value: the t-statistic, which is the coefficient estimate divided by the standard error of the estimate.
+#Pr(>|t|): The p value corresponding to the t-statistic. The smaller the p value, the more significant the estimate is. 
+```
+
+e) Use the regression line to predict the `Sales` amount when `newspaper` budget is `$136.80K` and `facebook` is `$43.92K`.
+```{r}
+model2 <- lm(sales ~ newspaper + facebook, data = marketing) 
+predict(model2, data.frame(newspaper = 136.8, facebook = 43.92))
+```
+
+f) What is the difference between the output in (c) and the output in (e)
+```{r}
+#Based on the output on C, the predicted sales on newpaper is 22.3037. On the other hand when we combine the budget of the newspaper and facebook (from section E), the predicted sales amount is 20.67767.  
+```
+
+g) Display the correlation matrix of the variables: `youtube`, `facebook`, `newspaper` and `sales`. What conclusion can you draw?
+```{r}
+cor(marketing)
+
+#This table gives us all the possible combinations of any two variables, and for each pair of variables, we see their correlation coefficien. You can see on the diagonal, each item is fully correlated with itself and this matrix or table is symmetric, while for instance "youtube" and "facebook" is correlated with 0.054800866. Of course "facebook" and "youtube" is correlated with the same numbers as wee. For the conclusion, this table should be symmetric.
+```
+
+h) In your opinion, which statistical test should be used to discuss the relationship between `youtube` and `sales`?
+Hint:  Review the differnce between Pearson and Spearman tests.
+```{r}
+cor.test(marketing$youtube, marketing$sales, method = "pearson")
+cor.test(marketing$youtube, marketing$sales, method = "spearman")
+
+# Based on the results and the correlation analysis between Pearson and Spearman's correlation test, we will use Spearman's test between "youtube" and "sales". The reason for that as we can see the correlation at Spearman's is 0.8006144 which is a bit stronger correlation than what we got from Pearson's (0.7822244). The diffrenece between them is not that significant since their p-value is similar (and very small), so for this part we are only looking at their correlation coefficient and deduce using Spearman's test. 
+
+```
+
+
+
+##Question 3
+
+Install the `carData` dataset on your computer using the command `install.packages("carData")`. Then load the `CanPop: Canadian Population Data` into your session using the following command.  The CanPop` has 16 rows and 2 columns and represent the decennial time-series of Canadian population between 1851 and 2001.
+```{r}
+install.packages("carData")
+library("carData")
+data("CanPop", package = "carData")
+str(CanPop)
+```
+
+a) Which of the two variables is the independent variable and which is the dependent variable? Explain your choice.
+```{r}
+#Dependent variable is the population size and independent variable is the years. The reason is because by increasing the value of the year the population increases. By the normal standards it's very much probable to evaluate the increase of the population during the increase on the duration of the years. On the other hand, it's not probable to predict the opposite by saying increase in popolation causes the increase of the years.   
+```
+
+b) Assuming that year and population are linearly related, give the equation and the graph of the least-squares regression line.
+Hint: use lm() function.
+```{r}
+model <- lm(population ~ year, data = CanPop)
+plot(CanPop$year, CanPop$population)
+abline(model)
+```
+
+c) Explain the meaning of the slope and the y-intercept for the least-squares regression line in (c).
+```{r}
+# Least squares regression line of y on x is the line that makes the sum of the squares of the vertical distances of the data points from the line as small as possible. To indicate that this is a calculated line we will change from "y=" to "y hat =".  It can be shown that the slope (b) = r (sy/sx) where r is the correlation factor and s are the standard deviations for both x and y.
+#The y intercept (a) = `y - b`x  where `y and `x   are the respective means.
+#The slope is the rate of change, that amount of change in y when x increases by 1.  The intercept is the value of y when x = 0.
+```
+
+d) In year 2020, what would you predict the population's size to be.  Does the value of the predicted size matches your expectations? Explain.
+```{r}
+model1 <- lm(population ~ year, data = CanPop)
+predict(model1, data.frame(year = 2020))
+
+# The value of the predicted size does not match the expectation. The data prediction predicts that the population on 2020 will be less than 2001 which is not correlated with the dataset and the expectations. We expect the population to keep increasing each year and be linearly correlated with the whole dataset and the expectations. 
+```
