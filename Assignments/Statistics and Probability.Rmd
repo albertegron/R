@@ -3,9 +3,11 @@
 \newpage
 ## Question 1 
 
-Based on the Department of Mines and Technical Surveys and Statistics Canada, the attached file contains a migration data frame that has 90 entries and 8 columns.
+Based on the Department of Mines and Technical Surveys and Statistics Canada, the attached file contains a migration data frame that 
+has 90 entries and 8 columns.
 
-There is one record in the data file for each migration stream. You can average the 1966 and 1971 population figures for each of the source and destination provinces.
+There is one record in the data file for each migration stream. You can average the 1966 and 1971 population figures for each of 
+the source and destination provinces.
 
 This data frame contains the following columns:
 
