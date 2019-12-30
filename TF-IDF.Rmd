@@ -1,0 +1,166 @@
+#Install and load required packages
+```{r}
+#install.packages("tm")
+#install.packages("text2vec")
+library(tm)
+library(text2vec)
+```
+
+
+## Reading the Transcripts
+```{r}
+data <- read.csv(file = "C:/Users/User/Desktop/CIND 110/Assignment 3/transcripts.csv", header = F, sep = '|')
+doc <- 0
+for (i in c(2:100)) {doc[i] <- as.character(data$V1[i])}
+doc.list <- as.list(doc[2:100])
+N.docs <- length(doc.list)
+names(doc.list) <- paste0("Doc", c(1:N.docs))
+Query <- as.character(data$V1[1])
+```
+
+## Preparing the Corpus
+```{r}
+my.docs <- VectorSource(c(doc.list, Query))
+my.docs$Names <- c(names(doc.list), "Query")
+my.corpus <- Corpus(my.docs)
+my.corpus
+```
+
+
+## Cleaning and Preprocessing the text (Cleansing Techniques)
+```{r}
+#Write your answer here for Question 1 and Question 2:
+getTransformations()
+
+my.corpus <- tm_map(my.corpus, removePunctuation)
+#Statistically, we are interested to save space. If we search for a specific word, there is no necessity having punctuation for that. Having puntctuation does not give  us the beneficiery of retrieving words based on our search. Removing punctuation gives the possibility to save space within the corpus and retrieve only required words themselves.  
+
+my.corpus <- tm_map(my.corpus, stemDocument)
+# Stemming a word refers to replacing it with its most basic conjugate form. Stemming is common practice because we don’t want the basic conjugate words to convey different meanings to algorithms that we use to extract themes from unstructured texts. 
+
+my.corpus <- tm_map(my.corpus, stripWhitespace)
+# Often, a single white space or group of whitespaces can also be considered to be a “word” within a corpus. To prevent this, we use the stripWhitespace to prevent our serach to retreive unnecessary words and waste space. 
+
+#At the bottom line, we are interested in more compact and terrievable corpus. To make sure to keep enough space for other data.
+
+#Hint: use getTransformations() function in tm Package
+#https://cran.r-project.org/web/packages/tm/tm.pdf
+```
+
+##Creating a uni-gram Term Document Matrix
+```{r}
+term.doc.matrix <- TermDocumentMatrix(my.corpus)
+inspect(term.doc.matrix[1:10,1:10])
+```
+
+## Converting the generated TDM into a matrix and displaying the first 6 rows and the dimensions of the matrix
+```{r}
+term.doc.matrix <- as.matrix(term.doc.matrix)
+head(term.doc.matrix)
+dim(term.doc.matrix)
+```
+
+## Declaring weights (TF-IDF)
+```{r}
+get.tf.idf.weights <- function(tf.vec) {
+  # Computes the tfidf weights from the term frequency vector
+  n.docs <- length(tf.vec)
+  doc.frequency <- length(tf.vec[tf.vec > 0])
+  weights <- rep(0, length(tf.vec))
+  relative.frequency <- tf.vec[tf.vec > 0] / sum(tf.vec[tf.vec > 0])
+  weights[tf.vec > 0] <-  relative.frequency * log(n.docs/doc.frequency)
+  return(weights)
+}
+```
+
+## Declaring weights (TF-IDF variants)
+```{r}
+#Write your answer here for Question 3
+
+#1st Variant
+
+#get.tf.idf.weights <- function(tf.vec) {
+#  # Computes the tfidf weights from the term frequency vector
+#  n.docs <- length(tf.vec)
+#  doc.frequency <- length(tf.vec[tf.vec > 0])
+#  weights <- rep(0, length(tf.vec))
+#  relative.frequency <- tf.vec[tf.vec > 0] / sum(tf.vec[tf.vec > 0])
+#  weights[tf.vec > 0] <-  relative.frequency * log(n.docs/doc.frequency)
+#  return(weights)
+#}
+
+#2nd Variant
+
+#get.tf.idf.weights <- function(tf.vec) {
+#  # Computes tfidf weights from term frequency vector
+#  n.docs <- length(tf.vec)
+#  doc.frequency <- length(tf.vec[tf.vec > 0])
+#  weights <- rep(0, length(tf.vec))
+#  weights[tf.vec > 0] <- (1 + log2(tf.vec[tf.vec > 0])) * log2(n.docs/doc.frequency)
+#  return(weights)
+#}
+
+#3rd Variant
+
+#get.tf.idf.weights <- function(tf.vec) {
+#  # Computes the tfidf weights from the term frequency vector
+#  n.docs <- length(tf.vec)
+#  doc.frequency <- length(tf.vec[tf.vec > 0])
+#  weights <- rep(0, length(tf.vec))
+#  relative.frequency <- tf.vec[tf.vec > 0]
+#  weights[tf.vec > 0] <-  relative.frequency * log(n.docs/doc.frequency)
+#  return(weights)
+#}
+
+```
+
+###Computing Cosine Similarity and Displaying a heatmap
+```{r}
+tfidf.matrix <- t(apply(term.doc.matrix, 1,
+                        FUN = function(row) {get.tf.idf.weights(row)}))
+
+colnames(tfidf.matrix) <- my.docs$Names
+
+head(tfidf.matrix)
+dim(tfidf.matrix)
+
+
+similarity.matrix <- sim2(t(tfidf.matrix), method = 'cosine')
+heatmap(similarity.matrix)
+```
+
+##Showing the Results
+```{r}
+sort(similarity.matrix["Query", ], decreasing = TRUE)[1:10]
+```
+
+## Use the following chunck to comment and conclude after conducting your comparative analyses
+```{r}
+#Write your comments here for question 3:
+
+
+# For the first variant the data which was obtained is:
+#      Doc99       Query       Doc47       Doc58        Doc3       Doc97       Doc36       Doc19       Doc91 
+#1.000000000 1.000000000 0.012385976 0.008383373 0.005508723 0.005238462 0.005214897 0.005158892 0.005127050 
+#      Doc52 
+#0.004951326
+
+# For the second variant the data which was obtained is:
+#1.00000000 1.00000000 0.19466074 0.12344195 0.11053820 0.10964191 0.10174803 0.10148203 0.09256433 
+#     Doc75 
+#0.09144340 
+
+# For the third variant the data which was obtained is:
+#    Doc99     Query     Doc47      Doc2      Doc3     Doc91     Doc86      Doc1     Doc97     Doc95 
+#1.0000000 1.0000000 0.2936156 0.2363459 0.2151657 0.2101732 0.2091362 0.1831315 0.1375301 0.1268444 
+
+#The results obtained from three different variants shows that although the values assigned to each word differ, the underlying weight is relatively still the same. The difference is merely the scale of each method. The relative weights are still comparable. In all three scenarios, if a word appears in every document, the weight assigned to that word will still be 0. On the bottom line because all three variations are giving us different results, therefore it's hard to predict which results are the best and which formula variation can provide the best value.
+
+```
+
+
+## Use the following chunck to answer Question 4
+```{r}
+#Write your answer here for Question 4
+#Going towards N-grams, or in our case towards three adjacent words instead of one will tell the system to create an a column of three adjacent words as a new matrix. This approach will give more power out of a bag of words model than using one word each time. For instance, when we take the word "donald_trump_president" as a three adjacent words matrix instead of a "donald", it's becomes more powerfull in terms of helping in word positioning and in word ordering based on the queries used. Adding more adjacent words (adding N-grams) dramatically increases the power of the matrix which as a result will make the models more accurate that will allow them to learn more signals from the data. On the other hand, there is a drawback by using this approach. By pursuing that we will add columns to create the appropriate document term frequency matrix and this action will be more than doubling the total size of our matrix.  This drawback will lead into longer processing times and more processing power would be the tradeoff for potentially stronger Information Retrieval.
+```
