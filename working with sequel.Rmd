@@ -1,0 +1,174 @@
+---
+title: "cind110_Assignment_02"
+author: "Albert Egron" 
+date: "November 8, 2019"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+Use RStudio for this assignment. 
+Edit the file `A2_W19_Q.Rmd` and insert your R code where wherever you see the string "INSERT YOUR QUERY HERE"
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+This assignment makes use of data that were adapted from:
+R. Elmasri, S.B. Navathe (2016). Fundamentals of Database Systems, 7th Edition, Addison-Wesley
+
+
+#Setting the working diectory and establishing a connection to MYSQL Server
+```{r}
+#install.packages('RMySQL', dependencies = TRUE)
+library(RMySQL)
+sqlQuery <- function (query) {
+
+  # creating DB connection object with RMysql package
+  # Please consider changing the username and password 
+  DB <- dbConnect(MySQL(), user='root', password='data', dbname='LibraryDB',
+        host='127.0.0.1')
+  
+  # send Query to btain result set
+  rs <- dbSendQuery(DB, query)
+
+  # get elements from result sets and convert to dataframe
+  result <- fetch(rs, -1)
+  
+  # close db connection after function call exits
+  on.exit(dbDisconnect(DB))
+
+  # return the dataframe
+  return(result)
+}
+```
+
+#Example 1
+Retrieve the name and address of all borrowers.
+```{r}
+sqlQuery("SELECT name, address FROM borrower;")
+```
+
+##Q1
+Add columns 'EmailAddr' and 'PhoneNo' in sequence to Table 'Borrower'
+```{r}
+sqlQuery("ALTER TABLE borrower 
+         ADD COLUMN EmailAddr VARCHAR(255), ADD COLUMN PhoneNo INT(10);");
+```
+
+##Q2
+a) Add column 'Charge' to Table 'Borrower' using data type "FLOAT". 
+b) Drop the column.
+c) Add the column again using data type "Decimal(5,2)".
+```{r}
+sqlQuery("ALTER TABLE borrower 
+         ADD COLUMN Charge FLOAT;") 
+sqlQuery("ALTER TABLE borrower 
+         DROP COLUMN Charge;")
+sqlQuery("ALTER TABLE borrower 
+         ADD COLUMN Charge Decimal(5,2);")
+```
+
+##Q3
+For library card numbers 1667, 7032 and 9781, change 'charge' values to 1.50.
+```{r}
+sqlQuery("UPDATE borrower 
+         SET Charge = 1.50
+         WHERE LibraryCardNo IN (1667, 7032, 9781);")
+```
+
+##Q4
+Change column name from 'Charge' to 'ChargeNew' with a default value of 0.00
+```{r}
+sqlQuery("ALTER TABLE borrower 
+         CHANGE COLUMN Charge ChargeNew Decimal(5,2) DEFAULT 0.00;")
+```
+
+##Q5
+For library card numbers 5007 and 8163, change the charge values to 0.00
+```{r}
+sqlQuery("UPDATE borrower 
+         SET ChargeNew = 0.00 WHERE LibraryCardNo IN (5007, 8163);")
+```
+
+##Q6
+Create a new Table called 'BorrowerCharge' through selecting 'LibraryCardNo' and 'ChargeNew' from Table 'Borrower'.
+```{r}
+sqlQuery("CREATE TABLE BorrowerCharge AS
+         SELECT LibraryCardNo, ChargeNew
+         FROM borrower;")
+```
+
+##Q7
+From Table 'BorrowerCharge', remove all rows where library card number equals to 8163
+```{r}
+sqlQuery("DELETE FROM BorrowerCharge WHERE LibraryCardNo = 8163;")
+```
+
+##Q8
+Add foreign key constraints to 'BookNo' in Table 'BookLended', referencing 'BookNo' in Table 'Book' and 'librarycardno' in Table 'Borrower'
+```{r}
+sqlQuery("ALTER TABLE bookLended 
+         ADD CONSTRAINT LibraryCardNo FOREIGN KEY (LibraryCardNo) 
+         REFERENCES borrower(LibraryCardNo), 
+         ADD CONSTRAINT BookId FOREIGN KEY (BookId) REFERENCES books(BookNo);")
+```
+
+##Q9
+Retrieve the names and charges from Borrowers whose charges are greater than 0
+```{r}
+sqlQuery("SELECT name, ChargeNew FROM borrower
+         WHERE ChargeNew > 0;")
+```
+
+##Q10
+Find the average of the charges of all borrowers.
+```{r}
+sqlQuery("SELECT AVG(ChargeNew) AS Average_Charges 
+         FROM borrower;")
+```
+
+##Q11
+Retrieve the names and authors of the books that make at least $50 more than the book which costs the least.
+```{r}
+sqlQuery("SELECT Title, Author FROM books 
+         WHERE Cost >= (SELECT  min(Cost) FROM books) + 50;")
+```
+
+##Q12
+Find all the information about Borrowers who have borrowed a book.
+```{r}
+sqlQuery("SELECT * FROM borrower NATURAL JOIN bookLended;")
+```
+
+##Q13
+Create a virtual table to view borrowers' information using library card number, charges, address, check-out date, return date, book number, copyid and librarian columns.
+```{r}
+sqlQuery("CREATE VIEW borrowerI AS
+         SELECT A.LibraryCardNo, A.ChargeNew, A.Address,
+         B.CheckOutDate, B.ReturnDate, B.BookId, B.CopyId, B.Librarian FROM borrower A, bookLended B
+         WHERE A.LibraryCardNo = B.LibraryCardNo;")
+sqlQuery("SELECT * FROM borrowerI;")
+```
+
+##Q14
+Retrieve library card numbers from Table 'LibraryCardNo' and Table 'BookLended' and combine them together (duplicate values also) in a row-wise manner
+```{r}
+sqlQuery("SELECT LibraryCardNo FROM borrower 
+         UNION ALL SELECT LibraryCardNo FROM bookLended 
+         ORDER BY LibraryCardNo;")
+```
+
+##Q15
+Count the number of librarians grouped by library card number in Table 'BookLended'.
+```{r}
+sqlQuery("SELECT count(DISTINCT LibraryCardNo) FROM bookLended;")
+```
