@@ -33,13 +33,17 @@ my.corpus
 getTransformations()
 
 my.corpus <- tm_map(my.corpus, removePunctuation)
-#Statistically, we are interested to save space. If we search for a specific word, there is no necessity having punctuation for that. Having puntctuation does not give  us the beneficiery of retrieving words based on our search. Removing punctuation gives the possibility to save space within the corpus and retrieve only required words themselves.  
+#Statistically, we are interested to save space. If we search for a specific word, there is no necessity having 
+punctuation for that. Having puntctuation does not give  us the beneficiery of retrieving words based on our search. 
+Removing punctuation gives the possibility to save space within the corpus and retrieve only required words themselves.  
 
 my.corpus <- tm_map(my.corpus, stemDocument)
-# Stemming a word refers to replacing it with its most basic conjugate form. Stemming is common practice because we don’t want the basic conjugate words to convey different meanings to algorithms that we use to extract themes from unstructured texts. 
+# Stemming a word refers to replacing it with its most basic conjugate form. Stemming is common practice because we don’t 
+want the basic conjugate words to convey different meanings to algorithms that we use to extract themes from unstructured texts. 
 
 my.corpus <- tm_map(my.corpus, stripWhitespace)
-# Often, a single white space or group of whitespaces can also be considered to be a “word” within a corpus. To prevent this, we use the stripWhitespace to prevent our serach to retreive unnecessary words and waste space. 
+# Often, a single white space or group of whitespaces can also be considered to be a “word” within a corpus. To prevent this, 
+we use the stripWhitespace to prevent our serach to retreive unnecessary words and waste space. 
 
 #At the bottom line, we are interested in more compact and terrievable corpus. To make sure to keep enough space for other data.
 
@@ -154,7 +158,11 @@ sort(similarity.matrix["Query", ], decreasing = TRUE)[1:10]
 #    Doc99     Query     Doc47      Doc2      Doc3     Doc91     Doc86      Doc1     Doc97     Doc95 
 #1.0000000 1.0000000 0.2936156 0.2363459 0.2151657 0.2101732 0.2091362 0.1831315 0.1375301 0.1268444 
 
-#The results obtained from three different variants shows that although the values assigned to each word differ, the underlying weight is relatively still the same. The difference is merely the scale of each method. The relative weights are still comparable. In all three scenarios, if a word appears in every document, the weight assigned to that word will still be 0. On the bottom line because all three variations are giving us different results, therefore it's hard to predict which results are the best and which formula variation can provide the best value.
+#The results obtained from three different variants shows that although the values assigned to each word differ, 
+the underlying weight is relatively still the same. The difference is merely the scale of each method. The relative 
+weights are still comparable. In all three scenarios, if a word appears in every document, the weight assigned to that 
+word will still be 0. On the bottom line because all three variations are giving us different results, therefore it's 
+hard to predict which results are the best and which formula variation can provide the best value.
 
 ```
 
@@ -162,5 +170,13 @@ sort(similarity.matrix["Query", ], decreasing = TRUE)[1:10]
 ## Use the following chunck to answer Question 4
 ```{r}
 #Write your answer here for Question 4
-#Going towards N-grams, or in our case towards three adjacent words instead of one will tell the system to create an a column of three adjacent words as a new matrix. This approach will give more power out of a bag of words model than using one word each time. For instance, when we take the word "donald_trump_president" as a three adjacent words matrix instead of a "donald", it's becomes more powerfull in terms of helping in word positioning and in word ordering based on the queries used. Adding more adjacent words (adding N-grams) dramatically increases the power of the matrix which as a result will make the models more accurate that will allow them to learn more signals from the data. On the other hand, there is a drawback by using this approach. By pursuing that we will add columns to create the appropriate document term frequency matrix and this action will be more than doubling the total size of our matrix.  This drawback will lead into longer processing times and more processing power would be the tradeoff for potentially stronger Information Retrieval.
+#Going towards N-grams, or in our case towards three adjacent words instead of one will tell the system to create an 
+a column of three adjacent words as a new matrix. This approach will give more power out of a bag of words model than 
+using one word each time. For instance, when we take the word "donald_trump_president" as a three adjacent words matrix 
+instead of a "donald", it's becomes more powerfull in terms of helping in word positioning and in word ordering based 
+on the queries used. Adding more adjacent words (adding N-grams) dramatically increases the power of the matrix which 
+as a result will make the models more accurate that will allow them to learn more signals from the data. On the other 
+hand, there is a drawback by using this approach. By pursuing that we will add columns to create the appropriate document 
+term frequency matrix and this action will be more than doubling the total size of our matrix.  This drawback will lead 
+into longer processing times and more processing power would be the tradeoff for potentially stronger Information Retrieval.
 ```
