@@ -1,0 +1,91 @@
+
+```{r}
+library(MASS)
+data(cats)
+str(cats)
+model<- lm(Hwt~Bwt, data=cats)
+plot(cats$Bwt, cats$Hwt, las=1, type="n",xlim = c(0,5), ylim =c(-2,10))
+abline(model)# drawing the regression line
+with(cats, points(Bwt[Sex=="F"], Hwt[Sex=="F"], pch=16, col="red"))
+with(cats, points(Bwt[Sex=="M"], Hwt[Sex=="M"], pch=17, col="blue"))
+
+max(cats$Bwt)
+
+#prediction for cat model for Hwt of a cat with Bwt = 6.5
+summary(model)
+# Based on the following newHwt = -0.3567 + newBwt * 4.0341 
+#Estimate Std. Error t value Pr(>|t|)
+#(Intercept)  -0.3567     0.6923  -0.515    0.607
+#Bwt           4.0341     0.2503  16.119   <2e-16
+newBwt = 6.5
+newHwt = -0.3567 + newBwt * 4.0341
+
+#or use predict function as follows
+new.df <- data.frame(Bwt=c(6.5))
+predict(model, new.df)
+
+#Let's take a look at the error
+bwt.df <- data.frame(Bwt= cats$Bwt)
+predict.bwt <- data.frame(predict = predict(model,bwt.df))
+predicted.cat <- cbind(cats,predict.bwt)
+error.df <- data.frame(error=(predicted.cat$Hwt-predicted.cat$predict))
+predicted.cat <- cbind(predicted.cat, error.df)
+summary(predicted.cat$error)
+summary(model)
+boxplot(predicted.cat$error)
+error.pdf <- data.frame(percent_error=(100*abs(predicted.cat$error)/predicted.cat$Hwt))
+predicted.cat <- cbind(predicted.cat, error.pdf)
+
+boxplot(predicted.cat$percent_error)
+hist(predicted.cat$percent_error)
+
+rmse <- function(error)
+{
+	sqrt(mean(error^2))
+}
+rmse(predicted.cat$error)
+
+mae <- function(error)
+{
+    mean(abs(error))
+}
+
+mae(predicted.cat$error)
+
+rmse2 <- function(error)
+{
+	sqrt(mean(error^2))
+}
+```
+
+#############################################
+```{r}
+data(mtcars)
+str(mtcars)
+model1 <- lm(mpg ~ hp, data=mtcars)
+summary(model1)
+model2 <- lm(mpg~wt, data=mtcars)
+summary(model2)
+```
+###############################################
+```{r}
+library(ISLR)
+data(rmse(predicted.cat$error)
+)
+str(Wage)
+lm(wage~age+education+jobclass, data=Wage)
+```
+##############################################
+```{r}
+library(faraway)
+data(hsb)
+str(hsb)
+g1 <- lm(science~gender +race+ses+schtyp+prog+
+          read+write+socst, data=hsb)
+
+#You can also use the following one for all the variables
+# g1 <- lm(science~., data=hsb) 
+summary(g1)        
+```
+###############################################
+
