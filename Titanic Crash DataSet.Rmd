@@ -1,0 +1,86 @@
+1. Read the "train.csv" file from the following website.
+"https://raw.githubusercontent.com/agconti/kaggle-titanic/master/data/train.csv"
+```{r echo=TRUE}
+data<-read.csv(file="https://raw.githubusercontent.com/agconti/kaggle-titanic/master/data/train.csv",header=T,sep=",")
+```
+
+View(train.data)
+
+2. Have a look at the data set.
+```{r echo=TRUE}
+head(data)
+tail(data)
+str(data)
+```
+
+3. SInce we see thriuth the structure the Pclass and Survived listed as an integer. So here we are in need to Change the "Pclass" 
+and "Survived" attributes to factors.
+```{r echo=TRUE}
+data$Pclass = factor(data$Pclass)
+data$Survived = factor(data$Survived)
+str(data)
+```
+
+4. Check the missing values of the "Age" and "Name" attributes. 
+```{r echo=TRUE}
+sum(is.na(data$Age))
+length(data$Age)
+sum(is.na(data$Name))
+length(data$Name)
+```
+
+5. For a title containing a missing value, assign the mean age value for each title not containing a missing value. 
+(Hint: grepl(" Mr\\.", train.data$Name))
+```{r echo=TRUE}
+mean.mr = mean(data$Age[grepl(" Mr\\.",
+     data$Name) & !is.na(data$Age)])
+data$Age[grepl(" Mr\\.",data$Name) & is.na(data$Age)]=mean.mr
+mean.mr
+```
+
+```{r echo=TRUE}
+mean.mrs = mean(data$Age[grepl(" Mrs\\.", 
+      data$Name) & !is.na(data$Age)])
+data$Age[grepl(" Mrs\\.",data$Name)&is.na(data$Age)]=mean.mrs
+mean.mrs
+```
+```{r echo=TRUE}
+mean.dr = mean(data$Age[grepl(" Dr\\.",
+      data$Name) & !is.na(data$Age)])
+data$Age[grepl(" Dr\\.",data$Name) & is.na(data$Age)]=mean.dr
+mean.dr
+```
+```{r echo=TRUE}
+mean.miss = mean(data$Age[grepl(" Miss\\.", 
+      data$Name) & !is.na(data$Age)])
+data$Age[grepl(" Miss\\.",data$Name) & is.na(data$Age)]=mean.miss
+mean.miss
+```
+```{r echo=TRUE}
+mean.master = mean(data$Age[grepl(" Master\\.",
+       data$Name) & !is.na(data$Age)])
+data$Age[grepl(" Master\\.", data$Name) & is.na(data$Age)]=mean.master
+mean.master
+```
+
+View(data)
+
+6. List the distribution of Port of Embarkation. Replace empty entries with NA for "Embarked" attribute.
+```{r echo=TRUE}
+str(data$Embarked)
+table(data$Embarked, useNA = "always")
+data$Embarked<-replace(data$Embarked,data$Embarked == "", NA)
+sum(is.na(data$Embarked))
+```
+
+7. Assign the two missing values to the most counted port, which is Southampton in this case.
+```{r echo=TRUE}
+data$Embarked[which(is.na(data$Embarked))] = 'S'
+table(data$Embarked, useNA = "always")
+str(data$Embarked)
+
+table_ <- table(data$Embarked, useNA = "always")
+
+which.max(table_)
+```
+
